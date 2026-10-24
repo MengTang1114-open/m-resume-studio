@@ -1,0 +1,226 @@
+<!doctype html>
+<html lang="zh-CN" data-theme="light">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="本地简历工作台：双语编辑、快捷排版、导出与机器翻译草稿。内容仅保存在本机浏览器。">
+  <title>简历工作台</title>
+  <link rel="stylesheet" href="style.css?v=profile-en-20261024-r3">
+</head>
+<body>
+  <a class="skip-link" href="#editorPane">跳到内容区</a>
+
+  <header class="topbar">
+    <div class="brand">
+      <span class="brand-mark" aria-hidden="true"></span>
+      <div class="brand-text">
+        <span class="brand-name" id="brandName">Resume Studio</span>
+        <span class="badge" id="templateBadge">示例模板</span>
+      </div>
+    </div>
+    <div class="save-cluster">
+      <span class="save-dot" id="saveDot" aria-hidden="true"></span>
+      <span id="saveStatus" role="status" aria-live="polite">已保存</span>
+      <button type="button" id="saveBtn" class="ghost" aria-label="保存当前稿件">保存</button>
+    </div>
+    <div class="top-actions">
+      <div class="seg" role="group" aria-label="稿件语言">
+        <button type="button" id="langZh" aria-pressed="true">中文</button>
+        <button type="button" id="langEn" aria-pressed="false">EN</button>
+      </div>
+      <div class="seg" role="group" aria-label="界面主题">
+        <button type="button" id="themeLight" aria-pressed="true" aria-label="浅色主题">浅色</button>
+        <button type="button" id="themeDark" aria-pressed="false" aria-label="深色主题">深色</button>
+      </div>
+      <button type="button" id="focusBtn" class="ghost" aria-pressed="false" aria-label="专注预览">专注</button>
+      <button type="button" id="translateBtn" class="accent">生成英文草稿</button>
+      <button type="button" id="printBtn" class="ghost" aria-label="打印或保存 PDF">打印 / PDF</button>
+      <div class="menu" id="exportWrap">
+        <button type="button" id="exportMenuBtn" class="ghost" aria-haspopup="true" aria-expanded="false" aria-controls="exportMenu">导出</button>
+        <div id="exportMenu" class="menu-panel" hidden role="menu">
+          <button type="button" role="menuitem" id="exportMd">导出 Markdown</button>
+          <button type="button" role="menuitem" id="exportHtml">导出离线 HTML</button>
+          <button type="button" role="menuitem" id="exportJson">导出 JSON 备份</button>
+          <label class="file-label" role="menuitem">导入 Markdown
+            <input id="importMd" type="file" accept=".md,.markdown,text/markdown,text/plain">
+          </label>
+          <label class="file-label" role="menuitem">导入 JSON 备份
+            <input id="importJson" type="file" accept=".json,application/json">
+          </label>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <div class="sample-banner" id="sampleBanner" role="note">
+    当前为匿名示例模板，请替换为你自己的经历。稿件、排版与主题仅保存在本机浏览器，不会上传。
+  </div>
+
+  <div class="mobile-tabs" role="tablist" aria-label="编辑或预览">
+    <button type="button" id="mobileEdit" role="tab" aria-selected="true" aria-controls="editorPane">编辑</button>
+    <button type="button" id="mobilePreview" role="tab" aria-selected="false" aria-controls="previewPane">预览</button>
+  </div>
+
+  <main class="workspace">
+    <section class="editor-pane" id="editorPane">
+      <div class="pane-tabs" role="tablist" aria-label="左侧工作区">
+        <button type="button" id="tabEdit" role="tab" aria-selected="true" aria-controls="panelEdit">内容</button>
+        <button type="button" id="tabLayout" role="tab" aria-selected="false" aria-controls="panelLayout">排版</button>
+        <button type="button" id="tabCheck" role="tab" aria-selected="false" aria-controls="panelCheck">检查</button>
+        <button type="button" id="tabHistory" role="tab" aria-selected="false" aria-controls="panelHistory">历史</button>
+      </div>
+
+      <div id="panelEdit" class="panel" role="tabpanel" aria-labelledby="tabEdit">
+        <div class="editor-tabs" role="tablist" aria-label="编辑方式">
+          <button type="button" id="visualTab" role="tab" aria-selected="true" aria-controls="visualPanel">直接编辑</button>
+          <button type="button" id="markdownTab" role="tab" aria-selected="false" aria-controls="markdownPanel">Markdown（高级）</button>
+          <span id="syncState" role="status">实时预览</span>
+        </div>
+        <p id="visualHint" class="hint">像 Word 一样点击简历文字直接修改。选中一条经历后，用按钮新增、删除或调整顺序。</p>
+        <div id="visualPanel" class="visual-scroll" role="tabpanel" aria-labelledby="visualTab">
+          <div class="direct-tools">
+            <div class="direct-topline">
+              <button type="button" id="undoBtn" class="ghost">撤销</button>
+              <button type="button" id="redoBtn" class="ghost">重做</button>
+              <details id="sectionOptions"><summary id="sectionOptionsLabel">显示栏目</summary><div id="modulePicker"></div></details>
+            </div>
+            <div class="direct-context">
+              <span id="directSelection" role="status"></span>
+              <div class="direct-actions" role="group" aria-label="整条经历操作">
+                <button type="button" id="entryAdd" data-action="add-entry" class="accent-ghost">新增一段</button>
+                <button type="button" id="entryCopy" data-action="duplicate-entry">复制</button>
+                <button type="button" id="entryUp" data-action="move-entry-up">上移</button>
+                <button type="button" id="entryDown" data-action="move-entry-down">下移</button>
+                <button type="button" id="entryDelete" data-action="delete-entry" class="danger">删除此段</button>
+                <details class="module-order"><summary id="moduleOrderLabel">栏目顺序</summary><div>
+                  <button type="button" id="moduleUp" data-action="move-module-up">栏目上移</button>
+                  <button type="button" id="moduleDown" data-action="move-module-down">栏目下移</button>
+                </div></details>
+              </div>
+            </div>
+          </div>
+          <article id="visualEditor" class="paper editor-paper" aria-label="直接编辑简历"></article>
+        </div>
+        <div id="markdownPanel" role="tabpanel" aria-labelledby="markdownTab" hidden>
+          <p id="mdPhotoHint" class="hint">Markdown 是纯文本，不含照片。请用 JSON 备份或导出 HTML / PDF 来保留照片。</p>
+          <label class="sr-only" for="source">Markdown 内容</label>
+          <textarea id="source" spellcheck="false"></textarea>
+        </div>
+      </div>
+
+      <div id="panelLayout" class="panel" role="tabpanel" aria-labelledby="tabLayout" hidden>
+        <p class="hint" id="layoutHint">排版会同时作用于右侧预览和打印 / PDF。恢复默认排版不会清空文稿。照片设置独立保存，不会被快捷样式清掉。</p>
+        <fieldset class="preset-row">
+          <legend id="presetLegend">快捷样式</legend>
+          <div class="seg wide" role="group" aria-labelledby="presetLegend">
+            <button type="button" id="presetClassic" data-preset="classic" aria-pressed="true">经典</button>
+            <button type="button" id="presetCompact" data-preset="compact" aria-pressed="false">紧凑</button>
+            <button type="button" id="presetModern" data-preset="modern" aria-pressed="false">现代</button>
+          </div>
+        </fieldset>
+        <fieldset class="preset-row photo-row">
+          <legend id="photoLegend">照片</legend>
+          <div class="seg wide" role="group" aria-labelledby="photoLegend">
+            <button type="button" id="photoOff" aria-pressed="true">无照片</button>
+            <button type="button" id="photoOn" aria-pressed="false">有照片</button>
+          </div>
+        </fieldset>
+        <div id="photoControls" class="photo-controls" hidden>
+          <p class="hint" id="photoHint">二寸照片（35×49mm）。支持 JPEG / PNG / WebP，最大 8MB。照片仅保存在本浏览器。</p>
+          <div class="photo-actions">
+            <label class="file-label photo-file" id="photoChooseLabel">
+              <span id="photoChooseText">选择照片</span>
+              <input id="photoFile" type="file" accept="image/jpeg,image/png,image/webp,.jpg,.jpeg,.png,.webp">
+            </label>
+            <button type="button" id="photoRemove" class="ghost" hidden>移除照片</button>
+          </div>
+          <p class="hint" id="photoStatus"></p>
+          <label class="slider" id="photoOffsetRow" hidden>
+            <span id="photoOffsetLabel">上下位置</span>
+            <input id="photoOffset" type="range" min="-100" max="100" step="5" value="0">
+            <output id="photoOffsetOut">居中</output>
+          </label>
+        </div>
+        <label class="slider">
+          <span id="sizeLabel">字号</span>
+          <input id="sizeInput" type="range" min="8" max="12" step="0.5" value="9">
+          <output id="sizeOut">9pt</output>
+        </label>
+        <label class="slider">
+          <span id="leadLabel">行距</span>
+          <input id="leadInput" type="range" min="1.2" max="2" step="0.05" value="1.73">
+          <output id="leadOut">1.73</output>
+        </label>
+        <label class="slider">
+          <span id="padLabel">页边距</span>
+          <input id="padInput" type="range" min="16" max="48" step="2" value="36">
+          <output id="padOut">36pt</output>
+        </label>
+        <fieldset class="swatches">
+          <legend id="accentLegend">强调色</legend>
+          <div id="accentRow" class="swatch-row"></div>
+        </fieldset>
+        <p id="pageWarnLayout" class="page-warn" hidden>内容超出 A4 一页。预览会标出分页线，打印时继续分页，不会裁切。</p>
+        <button type="button" id="resetLayout" class="ghost">恢复默认排版</button>
+      </div>
+
+      <div id="panelCheck" class="panel" role="tabpanel" aria-labelledby="tabCheck" hidden>
+        <p class="hint" id="checkHint">按 Markdown 结构做保守提示，不是语义 AI，也不会阻止导出。</p>
+        <div id="checkSummary" class="check-summary"></div>
+        <ul id="checkList" class="check-list"></ul>
+        <aside class="star-box" id="starBox"></aside>
+      </div>
+
+      <div id="panelHistory" class="panel" role="tabpanel" aria-labelledby="tabHistory" hidden>
+        <p class="hint" id="historyHint">手动保存（含 ⌘/Ctrl+S）会留下最近 50 条记录，可恢复当时的中英文稿与排版。</p>
+        <p id="backupNote" class="hint" hidden></p>
+        <button type="button" id="restoreEnBackup" class="ghost" hidden>恢复覆盖前的英文稿</button>
+        <div id="timeline" class="timeline"></div>
+      </div>
+    </section>
+
+    <section class="preview-pane" id="previewPane">
+      <div class="preview-meta">
+        <span id="docLabel">中文简历</span>
+        <span id="pageWarn" class="page-warn" hidden>超出 A4 一页，打印将分页，不会裁切。</span>
+      </div>
+      <div class="paper-stage" id="paperStage">
+        <div class="paper-scale" id="paperScale">
+          <div class="paper-wrap" id="paperWrap">
+            <article class="paper" id="resume" aria-label="简历预览"></article>
+            <div class="a4-guide" id="a4Guide" hidden aria-hidden="true"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <p id="storageBanner" class="storage-banner" hidden role="alert"></p>
+  <p id="toast" class="toast" role="status" aria-live="polite" hidden></p>
+
+  <dialog id="translateDialog" aria-labelledby="tdTitle">
+    <form method="dialog" id="translateForm">
+      <h2 id="tdTitle">生成英文草稿</h2>
+      <div id="tdBody" class="dialog-copy"></div>
+      <label class="check-row" id="overwriteRow" hidden>
+        <input type="checkbox" id="overwriteCheck">
+        <span id="overwriteLabel">我了解将覆盖当前英文稿，覆盖前会自动备份。</span>
+      </label>
+      <div class="dialog-actions">
+        <button type="button" id="tdCancel">取消</button>
+        <button type="submit" value="confirm" id="tdConfirm" class="accent">确认并开始翻译</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="progressDialog" aria-labelledby="pdTitle">
+    <h2 id="pdTitle">正在翻译</h2>
+    <p id="pdStatus">准备中…</p>
+    <progress id="pdBar" max="1" value="0"></progress>
+    <p class="hint" id="pdHint">这是 MyMemory 机器翻译草稿，不是 AI 写作。</p>
+    <button type="button" id="pdCancel">取消</button>
+  </dialog>
+
+  <script type="module" src="app.js?v=profile-en-20261024-r3"></script>
+</body>
+</html>

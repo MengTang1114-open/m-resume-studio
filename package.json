@@ -1,0 +1,14 @@
+{
+  "name": "m-resume-studio",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "A bilingual resume skill and a browser-local visual resume editor",
+  "scripts": {
+    "test": "node --test web/tests/*.test.js",
+    "check": "python3 scripts/check_public_bundle.py",
+    "dev": "python3 -m http.server 4178 --bind 127.0.0.1 --directory web",
+    "package:site": "python3 scripts/package_site.py"
+  },
+  "engines": { "node": ">=18" }
+}
